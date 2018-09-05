@@ -9,7 +9,7 @@ import bbb_so as bbb # for gpio class
 
 #GPIO_DIR = "/sys/class/gpio/"
 UPDATE_DIRECTION = True
-USAGE75 = 75
+#USAGE75 = 75
 
 # P9 setup:
 # DGND      1|2    DGND
@@ -29,6 +29,7 @@ def single_led_on(leds_l, xled):
             led.set_val("1")
         else:
             led.set_val("0")
+ 
 # -------------------------------
 
 def semaforo(leds_):
@@ -42,9 +43,7 @@ def semaforo(leds_):
     
     def read_usage():
         p = subprocess.call(['./information'])
-        #f = open("percent.out","r")
-        #p = int(f.read())
-        #f.close()
+        print(p,'% de uso de memória' )
         return p
 
     while RUNNING.is_set():
@@ -76,18 +75,19 @@ def supervise():
             PANIC_MODE.clear()
             print("no more panic.")
 
-print("# setting leds")
+# setting leds")
 g = bbb.GPIO("green_led", "gpio67")
 y = bbb.GPIO("yellow_led", "gpio68")
 r = bbb.GPIO("red_led", "gpio69")
 leds = [g, y, r]
 
-print("# setting pb")
-pb = bbb.GPIO("push_button", "gpio44") 
+# setting push button")
+pb = bbb.GPIO("push_button", "gpio115") 
+pb.set_val('0')
 
 seconds = .5 # sleep time
 
-print("# setting directions for leds")
+# setting directions for leds")
 if (UPDATE_DIRECTION):
     for led in leds:
         led.set_dirc("out")
@@ -98,7 +98,7 @@ PANIC_MODE.clear()  #dont start at panic mode
 RUNNING = threading.Event()
 RUNNING.set()   #start running
 
-print("# threads")
+# threads")
 blinker = threading.Thread(target=semaforo, name="blinker", args=[leds], daemon=True)
 superviser = threading.Thread(target=supervise, name="superviser", daemon=True)
 
@@ -106,7 +106,9 @@ blinker.start()
 superviser.start()
 
 print("# starting tests...")
-time.sleep(30)
+bt_exit = '0'
+
+time.sleep(60)
 RUNNING.clear()
 
 print("# finished running tests.")
