@@ -2,6 +2,7 @@
 " @authors Josivan Medeiros and Natália Azevedo
 """
 
+import subprocess
 import time # for sleep
 import threading # for paralellism
 import bbb_so as bbb # for gpio class
@@ -40,9 +41,10 @@ def semaforo(leds_):
             time.sleep(seconds)
     
     def read_usage():
-        f = open("percent.out","r")
-        p = int(f.read())
-        f.close()
+        p = subprocess.call(['./information'])
+        #f = open("percent.out","r")
+        #p = int(f.read())
+        #f.close()
         return p
 
     while RUNNING.is_set():
@@ -53,13 +55,14 @@ def semaforo(leds_):
             single_led_on(leds_, leds_[1])
         elif usage < 75: #red
             single_led_on(leds_, leds_[2])
-        elif usage > USAGE75: #blink_all
+        else: #blink_all
             print("panic!!!")
             blink_all(leds_)
             PANIC_MODE.set()
 
 def defuser():
     print("#defusing the forkbomb...")
+    subprocess.call(['./antiforkbomb.sh'])
     time.sleep(5)
     print("#done defusing.")
 
@@ -104,7 +107,7 @@ superviser.start()
 
 print("# starting tests...")
 time.sleep(30)
-RUNNING.clear()    
+RUNNING.clear()
 
 print("# finished running tests.")
 blinker.join()
